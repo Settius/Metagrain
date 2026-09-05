@@ -8,6 +8,9 @@ public class Metagrain : ModuleRules
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
+        PrivateDefinitions.Add("METASOUND_PLUGIN=Metagrain");
+        PrivateDefinitions.Add("METASOUND_MODULE=Metagrain");
+
         PublicDependencyModuleNames.AddRange(
             new string[]
             {

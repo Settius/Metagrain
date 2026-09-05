@@ -226,7 +226,7 @@ namespace Metasound
             auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
                 {
                     FNodeClassMetadata Metadata;
-                    Metadata.ClassName = { FName("GranularSynth"), FName(""), FName("Metagrain") };
+                    Metadata.ClassName = { FName("Metagrain"), FName("GranularSynth"), FName("") };
                     Metadata.MajorVersion = 0; Metadata.MinorVersion = 6; 
                     Metadata.DisplayName = LOCTEXT("GranularSynth_DisplayName", "Granular Synth"); 
                     Metadata.Description = LOCTEXT("GranularSynth_Description", "Granular synthesizer with active voice controls");

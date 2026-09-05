@@ -264,7 +264,7 @@ namespace Metasound
             auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
                 {
                     FNodeClassMetadata Metadata;
-                    Metadata.ClassName = { FName("GranularWavePlayerSmooth"), FName(""), FName("") };
+                    Metadata.ClassName = { FName("Metagrain"), FName("GranularWavePlayerSmooth"), FName("") };
                     Metadata.MajorVersion = 1; Metadata.MinorVersion = 0;
                     Metadata.DisplayName = LOCTEXT("GranularWavePlayerSmooth_DisplayName", "Granular Wave Player Smooth");
                     Metadata.Description = LOCTEXT("GranularWavePlayerSmooth_Description", "Granular wave player optimized for smooth pad-like textures");
