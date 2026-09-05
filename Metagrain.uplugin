@@ -10,11 +10,10 @@
 	"DocsURL": "",
 	"MarketplaceURL": "",
 	"SupportURL": "",
-	"EngineVersion": "5.4.4",
-	"CanContainContent": true,
+		"CanContainContent": true,
 	"IsBetaVersion": true,
 	"IsExperimentalVersion": true,
-	"Installed": true,
+	"Installed": false,
 	"SupportedTargetPlatforms": [
 		"Win64",
 		"Mac"
