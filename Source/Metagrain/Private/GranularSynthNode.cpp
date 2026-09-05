@@ -1034,13 +1034,10 @@ namespace Metasound
     };
 
     // --- Node Facade ---
-    class FGranularSynthNode : public FNodeFacade 
+    class FGranularSynthNode : public TNodeFacade<FGranularSynthOperator> 
     {
     public:
-        FGranularSynthNode(const FNodeInitData& InitData) 
-            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FGranularSynthOperator>()) 
-        {
-        }
+        using TNodeFacade<FGranularSynthOperator>::TNodeFacade;
     };
 
     METASOUND_REGISTER_NODE(FGranularSynthNode) 
