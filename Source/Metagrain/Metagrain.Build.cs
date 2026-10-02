@@ -8,6 +8,18 @@ public class Metagrain : ModuleRules
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
+        // UE 5.6+ MetaSound node registration requires module-level registration lists.
+        // Without these definitions the METASOUND_REGISTER_NODE actions land in the
+        // deprecated global fallback list that nothing executes, so the plugin's node
+        // classes never register with the frontend registry.
+        PrivateDefinitions.AddRange(
+            new string[]
+            {
+                "METASOUND_PLUGIN=Metagrain",
+                "METASOUND_MODULE=Metagrain"
+            }
+        );
+
         PublicDependencyModuleNames.AddRange(
             new string[]
             {
