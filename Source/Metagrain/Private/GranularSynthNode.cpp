@@ -226,8 +226,11 @@ namespace Metasound
             auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
                 {
                     FNodeClassMetadata Metadata;
+                    // FNodeClassName's constructor is (InNamespace, InName, InVariant); the
+                    // previous braced init registered Namespace="GranularSynth", Name="",
+                    // Variant="Metagrain" (invalid class identity).
                     Metadata.ClassName = { FName("Metagrain"), FName("GranularSynth"), FName("") };
-                    Metadata.MajorVersion = 0; Metadata.MinorVersion = 6; 
+                    Metadata.MajorVersion = 0; Metadata.MinorVersion = 6;
                     Metadata.DisplayName = LOCTEXT("GranularSynth_DisplayName", "Granular Synth"); 
                     Metadata.Description = LOCTEXT("GranularSynth_Description", "Granular synthesizer with active voice controls");
                     Metadata.Author = TEXT("Maksym Kokoiev & Wouter Meija");
@@ -245,8 +248,8 @@ namespace Metasound
         {
             using namespace GranularSynthNode_VertexNames;
             const FInputVertexInterfaceData& InputData = InParams.InputData;
-            FTriggerReadRef PlayTriggerIn = InputData.GetOrConstructDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputTriggerPlay), InParams.OperatorSettings);
-            FTriggerReadRef StopTriggerIn = InputData.GetOrConstructDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputTriggerStop), InParams.OperatorSettings);
+            FTriggerReadRef PlayTriggerIn = InputData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputTriggerPlay), InParams.OperatorSettings);
+            FTriggerReadRef StopTriggerIn = InputData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputTriggerStop), InParams.OperatorSettings);
             FWaveAssetReadRef WaveAssetIn = InputData.GetOrCreateDefaultDataReadReference<FWaveAsset>(METASOUND_GET_PARAM_NAME(InParamWaveAsset), InParams.OperatorSettings);
             FFloatReadRef GrainDurationIn = InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(InParamGrainDuration), InParams.OperatorSettings);
             FFloatReadRef DurationRandIn = InputData.GetOrCreateDefaultDataReadReference<float>(METASOUND_GET_PARAM_NAME(InParamDurationRand), InParams.OperatorSettings);
@@ -1034,10 +1037,27 @@ namespace Metasound
     };
 
     // --- Node Facade ---
-    class FGranularSynthNode : public TNodeFacade<FGranularSynthOperator> 
+    class FGranularSynthNode : public FNodeFacade
     {
     public:
-        using TNodeFacade<FGranularSynthOperator>::TNodeFacade;
+        FGranularSynthNode(const FNodeInitData& InitData)
+            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FGranularSynthOperator>())
+        {
+        }
+
+        // UE 5.6+ registration constructor: required by METASOUND_REGISTER_NODE on 5.8
+        // (TIsNodeConstructorSupported accepts (FNodeData) or (FNodeData, TSharedRef<const FNodeClassMetadata>)).
+        FGranularSynthNode(const FNodeData& InNodeData, const TSharedRef<const FNodeClassMetadata>& InClassMetadata)
+            : FNodeFacade(InNodeData, InClassMetadata, TFacadeOperatorClass<FGranularSynthOperator>())
+        {
+        }
+
+        // UE 5.6+ registration: the frontend registry requires this static member
+        // (delegates to the operator's GetNodeInfo()).
+        static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FGranularSynthOperator::GetNodeInfo();
+        }
     };
 
     METASOUND_REGISTER_NODE(FGranularSynthNode) 

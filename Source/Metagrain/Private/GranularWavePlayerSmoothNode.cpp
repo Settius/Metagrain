@@ -264,7 +264,8 @@ namespace Metasound
             auto CreateNodeClassMetadata = []() -> FNodeClassMetadata
                 {
                     FNodeClassMetadata Metadata;
-                    Metadata.ClassName = { FName("Metagrain"), FName("GranularWavePlayerSmooth"), FName("") };
+                    // FNodeClassName ctor is (InNamespace, InName, InVariant); matches documented intent {Name, Variant, Namespace=""}.
+                    Metadata.ClassName = { FName(""), FName("GranularWavePlayerSmooth"), FName("") };
                     Metadata.MajorVersion = 1; Metadata.MinorVersion = 0;
                     Metadata.DisplayName = LOCTEXT("GranularWavePlayerSmooth_DisplayName", "Granular Wave Player Smooth");
                     Metadata.Description = LOCTEXT("GranularWavePlayerSmooth_Description", "Granular wave player optimized for smooth pad-like textures");
@@ -284,8 +285,8 @@ namespace Metasound
             const FInputVertexInterfaceData& InputData = InParams.InputData;
             
             // All param inputs in same order as constructor
-            FTriggerReadRef PlayTriggerIn = InputData.GetOrConstructDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputTriggerPlay), InParams.OperatorSettings);
-            FTriggerReadRef StopTriggerIn = InputData.GetOrConstructDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputTriggerStop), InParams.OperatorSettings);
+            FTriggerReadRef PlayTriggerIn = InputData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputTriggerPlay), InParams.OperatorSettings);
+            FTriggerReadRef StopTriggerIn = InputData.GetOrCreateDefaultDataReadReference<FTrigger>(METASOUND_GET_PARAM_NAME(InputTriggerStop), InParams.OperatorSettings);
             FWaveAssetReadRef WaveAssetIn = InputData.GetOrCreateDefaultDataReadReference<FWaveAsset>(METASOUND_GET_PARAM_NAME(InParamWaveAsset), InParams.OperatorSettings);
             
             // Float params
@@ -1348,10 +1349,27 @@ namespace Metasound
     };
 
     // --- Node ---
-    class FGranularWavePlayerSmoothNode : public TNodeFacade<FGranularWavePlayerSmoothOperator>
+    class FGranularWavePlayerSmoothNode : public FNodeFacade
     {
     public:
-        using TNodeFacade<FGranularWavePlayerSmoothOperator>::TNodeFacade;
+        FGranularWavePlayerSmoothNode(const FNodeInitData& InitData)
+            : FNodeFacade(InitData.InstanceName, InitData.InstanceID, TFacadeOperatorClass<FGranularWavePlayerSmoothOperator>())
+        {
+        }
+
+        // UE 5.6+ registration constructor: required by METASOUND_REGISTER_NODE on 5.8
+        // (TIsNodeConstructorSupported accepts (FNodeData) or (FNodeData, TSharedRef<const FNodeClassMetadata>)).
+        FGranularWavePlayerSmoothNode(const FNodeData& InNodeData, const TSharedRef<const FNodeClassMetadata>& InClassMetadata)
+            : FNodeFacade(InNodeData, InClassMetadata, TFacadeOperatorClass<FGranularWavePlayerSmoothOperator>())
+        {
+        }
+
+        // UE 5.6+ registration: the frontend registry requires this static member
+        // (delegates to the operator's GetNodeInfo()).
+        static FNodeClassMetadata CreateNodeClassMetadata()
+        {
+            return FGranularWavePlayerSmoothOperator::GetNodeInfo();
+        }
     };
     // --- Registration ---
     METASOUND_REGISTER_NODE(FGranularWavePlayerSmoothNode)

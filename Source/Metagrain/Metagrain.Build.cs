@@ -8,8 +8,22 @@ public class Metagrain : ModuleRules
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PrivateDefinitions.Add("METASOUND_PLUGIN=Metagrain");
-        PrivateDefinitions.Add("METASOUND_MODULE=Metagrain");
+        // Upstream code uses a try/catch block (GranularWavePlayerSmoothNode.cpp
+        // ProcessAudioForGrain). Game targets compile without exception unwind
+        // semantics (C4530) unless this is set; editor targets already enable them.
+        bEnableExceptions = true;
+
+        // UE 5.6+ MetaSound node registration requires module-level registration lists.
+        // Without these definitions the METASOUND_REGISTER_NODE actions land in the
+        // deprecated global fallback list that nothing executes, so the plugin's node
+        // classes never register with the frontend registry.
+        PrivateDefinitions.AddRange(
+            new string[]
+            {
+                "METASOUND_PLUGIN=Metagrain",
+                "METASOUND_MODULE=Metagrain"
+            }
+        );
 
         PublicDependencyModuleNames.AddRange(
             new string[]
@@ -19,36 +33,42 @@ public class Metagrain : ModuleRules
                 "MetasoundEngine",
                 "MetasoundGraphCore",
                 "MetasoundGenerator",
-                "MetasoundEngineTest",
-                "MetasoundEditor",
                 "MetasoundStandardNodes",
                 "MetasoundFrontend",
-                "MetasoundGenerator",
-                "MetasoundEngineTest",
-                "MetasoundEditor",
                 "WaveTable",
                 "AudioExtensions",
-                "SignalProcessing",
-                "MetasoundGraphCore"
+                "SignalProcessing"
             }
         );
+
+        // Editor-only Metasound modules (UncookedOnly: MetasoundEditor, MetasoundEngineTest)
+        // transitively reference engine editor modules (AudioEditor -> ClassViewer ->
+        // EditorSubsystem -> UnrealEd), which are illegal for Game targets. The plugin's
+        // runtime sources include no headers from these modules, so they are only
+        // referenced for editor targets.
+        if (Target.bBuildEditor)
+        {
+            PublicDependencyModuleNames.AddRange(
+                new string[]
+                {
+                    "MetasoundEditor",
+                    "MetasoundEngineTest"
+                }
+            );
+        }
 
         PrivateDependencyModuleNames.AddRange(
             new string[]
             {
-                "CoreUObject",
                 "Engine",
                 "AudioExtensions",
-                "MetasoundEditor",
-                "MetasoundEngineTest",
                 "MetasoundEngine",
                 "MetasoundFrontend",
                 "MetasoundGenerator",
                 "MetasoundGraphCore",
                 "MetasoundStandardNodes",
                 "WaveTable",
-                "SignalProcessing",
-                "AudioExtensions"
+                "SignalProcessing"
             }
         );
     }
