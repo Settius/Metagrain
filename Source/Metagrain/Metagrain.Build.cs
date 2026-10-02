@@ -28,36 +28,42 @@ public class Metagrain : ModuleRules
                 "MetasoundEngine",
                 "MetasoundGraphCore",
                 "MetasoundGenerator",
-                "MetasoundEngineTest",
-                "MetasoundEditor",
                 "MetasoundStandardNodes",
                 "MetasoundFrontend",
-                "MetasoundGenerator",
-                "MetasoundEngineTest",
-                "MetasoundEditor",
                 "WaveTable",
                 "AudioExtensions",
-                "SignalProcessing",
-                "MetasoundGraphCore"
+                "SignalProcessing"
             }
         );
+
+        // Editor-only Metasound modules (UncookedOnly: MetasoundEditor, MetasoundEngineTest)
+        // transitively reference engine editor modules (AudioEditor -> ClassViewer ->
+        // EditorSubsystem -> UnrealEd), which are illegal for Game targets. The plugin's
+        // runtime sources include no headers from these modules, so they are only
+        // referenced for editor targets.
+        if (Target.bBuildEditor)
+        {
+            PublicDependencyModuleNames.AddRange(
+                new string[]
+                {
+                    "MetasoundEditor",
+                    "MetasoundEngineTest"
+                }
+            );
+        }
 
         PrivateDependencyModuleNames.AddRange(
             new string[]
             {
-                "CoreUObject",
                 "Engine",
                 "AudioExtensions",
-                "MetasoundEditor",
-                "MetasoundEngineTest",
                 "MetasoundEngine",
                 "MetasoundFrontend",
                 "MetasoundGenerator",
                 "MetasoundGraphCore",
                 "MetasoundStandardNodes",
                 "WaveTable",
-                "SignalProcessing",
-                "AudioExtensions"
+                "SignalProcessing"
             }
         );
     }
