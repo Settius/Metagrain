@@ -8,6 +8,11 @@ public class Metagrain : ModuleRules
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
+        // Upstream code uses a try/catch block (GranularWavePlayerSmoothNode.cpp
+        // ProcessAudioForGrain). Game targets compile without exception unwind
+        // semantics (C4530) unless this is set; editor targets already enable them.
+        bEnableExceptions = true;
+
         // UE 5.6+ MetaSound node registration requires module-level registration lists.
         // Without these definitions the METASOUND_REGISTER_NODE actions land in the
         // deprecated global fallback list that nothing executes, so the plugin's node
